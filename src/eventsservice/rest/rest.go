@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ServeAPI(endpoint string, databasehandler persistence.DatabaseHandler) error {
+func ServeAPI(endpoint, tlsendpoint string, databasehandler persistence.DatabaseHandler) (chan error, chan error) {
 	//Crea el handler
 	handler := NewEventHandler(databasehandler)
 	//Crea un router
@@ -19,7 +19,15 @@ func ServeAPI(endpoint string, databasehandler persistence.DatabaseHandler) erro
 	eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.FindEventHandler)
 	eventsrouter.Methods("GET").Path("").HandlerFunc(handler.AllEventHandler)
 	eventsrouter.Methods("POST").Path("").HandlerFunc(handler.NewEventHandler)
+	httpErrChan := make(chan error)
+	httptlsErrChan := make(chan error)
 
-	//Empieza a escuchar
-	return http.ListenAndServe(endpoint, r)
+	go func() {
+		httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", r)
+	}()
+	go func() {
+		httpErrChan <- http.ListenAndServe(endpoint, r)
+	}()
+
+	return httpErrChan, httptlsErrChan
 }
