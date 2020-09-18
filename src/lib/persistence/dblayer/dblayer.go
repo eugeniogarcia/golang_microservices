@@ -5,16 +5,17 @@ import (
 	"lib/persistence/mongolayer"
 )
 
-//define un tipo custom
+//DBTYPE define un tipo custom
 type DBTYPE string
 
 //define constantes
 const (
-	MONGODB  DBTYPE = "mongodb"
-	DYNAMODB DBTYPE = "dynamodb"
+	MONGODB    DBTYPE = "mongodb"
+	DOCUMENTDB DBTYPE = "documentdb"
+	DYNAMODB   DBTYPE = "dynamodb"
 )
 
-//Devuelve un interface con los metodos necesarios para administrar los datos en la capa de persistencia
+//NewPersistenceLayer Devuelve un interface con los metodos necesarios para administrar los datos en la capa de persistencia
 func NewPersistenceLayer(options DBTYPE, connection string) (persistence.DatabaseHandler, error) {
 
 	switch options {
