@@ -6,6 +6,12 @@
 go get github.com/gorilla/mux
 ```
 
+Instala los handlers para soportar CORS:
+
+```ps
+go get github.com/gorilla/handlers
+```
+
 ## Instala el driver de Mongo
 
 ```ps

@@ -6,6 +6,7 @@ import (
 	"lib/msgqueue"
 	"lib/persistence"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -27,12 +28,14 @@ func ServeAPI(endpoint string, tlsendpoint string, dbHandler persistence.Databas
 	httpErrChan := make(chan error)
 	httptlsErrChan := make(chan error)
 
+	server := handlers.CORS()(r)
+
 	go func() {
-		httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", r)
+		httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", server)
 	}()
 
 	go func() {
-		httpErrChan <- http.ListenAndServe(endpoint, r)
+		httpErrChan <- http.ListenAndServe(endpoint, server)
 	}()
 
 	return httpErrChan, httptlsErrChan
