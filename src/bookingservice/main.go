@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"log"
+	"time"
 	"fmt"
 	"net/http"
 
@@ -38,7 +40,20 @@ func main() {
 	//Comprobamos que tipo de broker queremos usar
 	switch config.MessageBrokerType {
 	case "amqp":
-		conn, err := amqp.Dial(config.AMQPMessageBroker)
+
+		var conn *amqp.Connection
+		var err error
+		for i := 0; i < 3; i++ {
+			conn, err = amqp.Dial(config.AMQPMessageBroker)
+			if err == nil {
+				log.Println("connection successfully established")
+				break
+			}
+
+			log.Printf("AMQP connection failed with error: %s", err)
+			time.Sleep(5 * time.Second)
+		}
+
 		panicIfErr(err)
 
 		//Escuchamos por eventos events, y booking

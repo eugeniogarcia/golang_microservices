@@ -705,3 +705,221 @@ En este paquete definimos el modelo de datos. Tanto el cliente como el consumido
 
 ### eventservice
 
+Lee la configuración:
+
+```go
+confPath := flag.String("conf", `.\configuration\config.json`, "flag to set the path to the configuration json file")
+flag.Parse()
+//extract configuration
+config, _ := configuration.ExtractConfiguration(*confPath)
+```
+
+Comprueba que broker de mensajería esta configurado:
+
+```go
+switch config.MessageBrokerType {
+case "amqp":
+  conn, err := amqp.Dial(config.AMQPMessageBroker)
+  if err != nil {
+    panic(err)
+  }
+
+  eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+  if err != nil {
+    panic(err)
+  }
+case "kafka":
+  conf := sarama.NewConfig()
+  conf.Producer.Return.Successes = true
+  conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
+  if err != nil {
+    panic(err)
+  }
+
+  eventEmitter, err = kafka.NewKafkaEventEmitter(conn)
+  if err != nil {
+    panic(err)
+  }
+```
+
+Si AMQP se conecta con el broker y configura el emiter:
+
+```go
+conn, err := amqp.Dial(config.AMQPMessageBroker)
+
+eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+```
+
+Configura la capa de persistencia:
+
+```go
+dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
+```
+
+Con la capa de persistencia y el emiter configurados, se arranca el servidor http:
+
+```go
+httpErrChan, httptlsErrChan := rest.ServeAPI(config.RestfulEndpoint, config.RestfulTLSEndPint, dbhandler, eventEmitter)
+```
+
+#### Servidor http
+
+Para implementar el servidor http usamos la librería `github.com/gorilla/mux`. Gorilla necesita que se definan handlers que se asociarán a los recursos http:
+
+```go
+handler := newEventHandler(dbHandler, eventEmitter)
+```
+
+La librería usa routers. Creamos un router:
+
+```go
+r := mux.NewRouter()
+```  
+
+El router se configura definiendo los recursos, verbos y handlers:
+
+- recurso `/events`, con verbo `GET` y dos path parameters, es gestionando por `handler.findEventHandler`:
+
+```go
+eventsrouter := r.PathPrefix("/events").Subrouter()
+eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
+```
+
+```go
+	eventsrouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
+```
+
+```go
+eventsrouter.Methods("GET").Path("/{eventID}").HandlerFunc(handler.oneEventHandler)
+```
+
+```go
+eventsrouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
+```
+
+Una vez que se han definido todas las rutas, procedemos a iniciar la escucha. Como queremos en este caso escuchar por http y https, lanzamos dos go rutinas:
+
+```go
+httpErrChan := make(chan error)
+httptlsErrChan := make(chan error)
+
+server := handlers.CORS()(r)
+
+go func() {
+  httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", server)
+}()
+
+go func() {
+  httpErrChan <- http.ListenAndServe(endpoint, server)
+}()
+```
+
+#### Handlers
+
+Tipicamente tomaremos los parametros y headers del request
+
+```go
+func (eh *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	criteria, ok := vars["SearchCriteria"]
+	if !ok {
+		fmt.Fprint(w, `No search criteria found, you can either search by id via /id/4
+						to search by name via /name/coldplayconcert`)
+		return
+	}
+```
+
+Con los parametros ya procedemos a ejecutar la lógica, publicar mensajes si procede o actuar sobre la base de datos:
+
+```go
+		event, err = eh.dbhandler.FindEventByName(searchkey)
+```
+
+La respuesta de la api se tiene que construir:
+
+```go
+if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "Error occured %s", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
+	json.NewEncoder(w).Encode(&event)
+}
+```
+
+### bookingservice
+
+Como en el eventservice lee la configuración y comprueba que broker de mensajería esta configurado. En este servicio vamos a escuchar - listener - y publicar mensajes - emiter.
+
+```go
+switch config.MessageBrokerType {
+case "amqp":
+  conn, err := amqp.Dial(config.AMQPMessageBroker)
+  panicIfErr(err)
+
+  //Escuchamos por eventos events, y booking
+  eventListener, err = msgqueue_amqp.NewAMQPEventListener(conn, "events", "booking")
+  panicIfErr(err)
+
+  //A su vez publicamos events
+  eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+  panicIfErr(err)
+case "kafka":
+  conf := sarama.NewConfig()
+  conf.Producer.Return.Successes = true
+  conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
+  panicIfErr(err)
+
+  eventListener, err = kafka.NewKafkaEventListener(conn, []int32{})
+  panicIfErr(err)
+
+  eventEmitter, err = kafka.NewKafkaEventEmitter(conn)
+  panicIfErr(err)
+default:
+  panic("Bad message broker type: " + config.MessageBrokerType)
+}
+```
+
+Notese como hemos configurado también los listeners. En el caso de AMPQ configura los bindings `events` y `booking`:
+
+```go
+eventListener, err = msgqueue_amqp.NewAMQPEventListener(conn, "events", "booking")
+panicIfErr(err)
+```
+
+En el caso de Kafka escucha de todas las particiones:
+
+```go
+eventListener, err = kafka.NewKafkaEventListener(conn, []int32{})
+panicIfErr(err)
+```
+
+Como este servicio consume mensajes, lanza una go rutina para consumirlos:
+
+```ps
+//Procesa los eventos en una go rutina
+processor := listener.EventProcessor{eventListener, dbhandler}
+go processor.ProcessEvents()
+```
+
+Por lo demás el servicio es análigo al eventservice, se configura la capa de persistencia, y se inicia el servidor.
+
+#### Servidor http
+
+Otro estilo, pero mis cosa:
+
+```go
+r := mux.NewRouter()
+r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database})
+
+srv := http.Server{
+  Handler:      handlers.CORS()(r),
+  Addr:         listenAddr,
+  WriteTimeout: 2 * time.Second,
+  ReadTimeout:  1 * time.Second,
+}
+
+srv.ListenAndServe()
+```
+
