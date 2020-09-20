@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"net/http"
 
 	"bookingservice/listener"
 	"bookingservice/rest"
@@ -67,6 +69,13 @@ func main() {
 	processor := listener.EventProcessor{eventListener, dbhandler}
 	go processor.ProcessEvents()
 
-	//También sirve peticiones http. Usa el emiter para publicar los cambios
+	go func() {
+		fmt.Println("Serving metrics API")
+		h := http.NewServeMux()
+		h.Handle("/metrics", promhttp.Handler())
+
+		http.ListenAndServe(":9100", h)
+	}()
+
 	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
 }
