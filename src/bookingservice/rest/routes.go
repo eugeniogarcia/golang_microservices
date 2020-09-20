@@ -14,7 +14,7 @@ func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmit
 	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database})
 
 	srv := http.Server{
-		Handler:      r,
+		Handler:      handlers.CORS()(r),
 		Addr:         listenAddr,
 		WriteTimeout: 2 * time.Second,
 		ReadTimeout:  1 * time.Second,
