@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Shopify/sarama"
 
@@ -27,7 +28,19 @@ func main() {
 
 	switch config.MessageBrokerType {
 	case "amqp":
-		conn, err := amqp.Dial(config.AMQPMessageBroker)
+		var conn *amqp.Connection
+		var err error
+		for i := 0; i < 3; i++ {
+			conn, err = amqp.Dial(config.AMQPMessageBroker)
+			if err == nil {
+				log.Println("connection successfully established")
+				break
+			}
+
+			log.Printf("AMQP connection failed with error: %s", err)
+			time.Sleep(5 * time.Second)
+		}
+
 		if err != nil {
 			panic(err)
 		}

@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"lib/msgqueue"
 	"lib/persistence"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) {
