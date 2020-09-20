@@ -12,11 +12,15 @@ services:
 
   events-db:
     image: mongo
+    ports:
+      - 8006:27017
     networks:
       - myevents
 
   bookings-db:
     image: mongo
+    ports:
+      - 8008:27017
     networks:
       - myevents
 

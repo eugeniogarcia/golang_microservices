@@ -57,7 +57,7 @@ func main() {
 
 	fmt.Println("Serving API")
 	//RESTful API start
-	httpErrChan, httptlsErrChan := rest.ServeAPI(config.RestfulEndpoint, config.RestfulTLSEndpoint, dbhandler, eventEmitter)
+	httpErrChan, httptlsErrChan := rest.ServeAPI(config.RestfulEndpoint, config.RestfulTLSEndPint, dbhandler, eventEmitter)
 
 	select {
 	case err := <-httpErrChan:

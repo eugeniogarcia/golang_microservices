@@ -1,13 +1,22 @@
 FROM golang:latest
 
-WORKDIR /go/src/euge
+RUN go get github.com/mitchellh/mapstructure
+RUN go get github.com/Shopify/sarama
+RUN go get -u github.com/streadway/amqp
+RUN go get github.com/gorilla/mux
+RUN go get gopkg.in/mgo.v2
+
+WORKDIR /go/src
 COPY . .
-WORKDIR src/eventservice
+WORKDIR eventservice
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o eventservice
 
 FROM scratch
 
-COPY --from=0 /go/src/euge/src/eventservice/eventservice /eventservice
+COPY --from=0 /go/src/eventservice/eventservice /eventservice
+COPY --from=0 /go/src/eventservice/cert.pem /cert.pem
+COPY --from=0 /go/src/eventservice/key.pem /key.pem
 ENV LISTEN_URL=0.0.0.0:8181
 EXPOSE 8181
+EXPOSE 9191
 CMD ["/eventservice"]
