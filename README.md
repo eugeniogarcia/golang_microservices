@@ -705,3 +705,111 @@ En este paquete definimos el modelo de datos. Tanto el cliente como el consumido
 
 ### eventservice
 
+Lee la configuración:
+
+```go
+confPath := flag.String("conf", `.\configuration\config.json`, "flag to set the path to the configuration json file")
+flag.Parse()
+//extract configuration
+config, _ := configuration.ExtractConfiguration(*confPath)
+```
+
+Comprueba que broker de mensajería esta configurado:
+
+```go
+switch config.MessageBrokerType {
+case "amqp":
+  conn, err := amqp.Dial(config.AMQPMessageBroker)
+  if err != nil {
+    panic(err)
+  }
+
+  eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+  if err != nil {
+    panic(err)
+  }
+case "kafka":
+  conf := sarama.NewConfig()
+  conf.Producer.Return.Successes = true
+  conn, err := sarama.NewClient(config.KafkaMessageBrokers, conf)
+  if err != nil {
+    panic(err)
+  }
+
+  eventEmitter, err = kafka.NewKafkaEventEmitter(conn)
+  if err != nil {
+    panic(err)
+  }
+```
+
+Si AMQP se conecta con el broker y configura el emiter:
+
+```go
+conn, err := amqp.Dial(config.AMQPMessageBroker)
+
+eventEmitter, err = msgqueue_amqp.NewAMQPEventEmitter(conn, "events")
+```
+
+Configura la capa de persistencia:
+
+```go
+dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
+```
+
+Con la capa de persistencia y el emiter configurados, se arranca el servidor http:
+
+```go
+httpErrChan, httptlsErrChan := rest.ServeAPI(config.RestfulEndpoint, config.RestfulTLSEndPint, dbhandler, eventEmitter)
+```
+
+### Servidor http
+
+Para implementar el servidor http usamos la librería `github.com/gorilla/mux`. Gorilla necesita que se definan handlers que se asociarán a los recursos http:
+
+```go
+handler := newEventHandler(dbHandler, eventEmitter)
+```
+
+La librería usa routers. Creamos un router:
+
+```go
+r := mux.NewRouter()
+```  
+
+El router se configura definiendo los recursos, verbos y handlers:
+
+- recurso `/events`, con verbo `GET` y dos path parameters, es gestionando por `handler.findEventHandler`:
+
+```go
+eventsrouter := r.PathPrefix("/events").Subrouter()
+eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
+```
+
+```go
+	eventsrouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
+```
+
+```go
+eventsrouter.Methods("GET").Path("/{eventID}").HandlerFunc(handler.oneEventHandler)
+```
+
+```go
+eventsrouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
+```
+
+Una vez que se han definido todas las rutas, procedemos a iniciar la escucha. Como queremos en este caso escuchar por http y https, lanzamos dos go rutinas:
+
+```go
+httpErrChan := make(chan error)
+httptlsErrChan := make(chan error)
+
+server := handlers.CORS()(r)
+
+go func() {
+  httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", server)
+}()
+
+go func() {
+  httpErrChan <- http.ListenAndServe(endpoint, server)
+}()
+```
