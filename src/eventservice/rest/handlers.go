@@ -109,6 +109,7 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 	id, err := eh.dbhandler.AddEvent(event)
+
 	if nil != err {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "error occured while persisting event %s", err)

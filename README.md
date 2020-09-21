@@ -361,6 +361,14 @@ y lo deje así:
 }
 ```
 
+### Dangling images
+
+Despues de compilar tendremos una serie de imagenes temporales que podemos eliminar:
+
+```ps
+docker images prune
+```
+
 # Arquitectura de la Aplicación
 
 ## configuration
@@ -699,11 +707,11 @@ for _, partition := range partitions {
     }()
 ```
 
-### contracts
+## contracts
 
 En este paquete definimos el modelo de datos. Tanto el cliente como el consumidor compartiran este modelo.
 
-### eventservice
+## eventservice
 
 Lee la configuración:
 
@@ -762,7 +770,7 @@ Con la capa de persistencia y el emiter configurados, se arranca el servidor htt
 httpErrChan, httptlsErrChan := rest.ServeAPI(config.RestfulEndpoint, config.RestfulTLSEndPint, dbhandler, eventEmitter)
 ```
 
-#### Servidor http
+### Servidor http
 
 Para implementar el servidor http usamos la librería `github.com/gorilla/mux`. Gorilla necesita que se definan handlers que se asociarán a los recursos http:
 
@@ -814,7 +822,7 @@ go func() {
 }()
 ```
 
-#### Handlers
+### Handlers
 
 Tipicamente tomaremos los parametros y headers del request
 
@@ -848,7 +856,7 @@ if err != nil {
 }
 ```
 
-### bookingservice
+## bookingservice
 
 Como en el eventservice lee la configuración y comprueba que broker de mensajería esta configurado. En este servicio vamos a escuchar - listener - y publicar mensajes - emiter.
 
@@ -905,7 +913,7 @@ go processor.ProcessEvents()
 
 Por lo demás el servicio es análigo al eventservice, se configura la capa de persistencia, y se inicia el servidor.
 
-#### Servidor http
+### Servidor http
 
 Otro estilo, pero mis cosa:
 
