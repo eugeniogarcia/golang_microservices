@@ -711,6 +711,25 @@ for _, partition := range partitions {
 
 En este paquete definimos el modelo de datos. Tanto el cliente como el consumidor compartiran este modelo.
 
+En el contrato implementamos la estructura y los interfaces. Por ejemplo, `Event`:
+
+```go
+type EventCreatedEvent struct {
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	LocationID string    `json:"location_id"`
+	Start      time.Time `json:"start_date"`
+	End        time.Time `json:"end_date"`
+}
+
+// EventName returns the event's name
+func (c *EventCreatedEvent) EventName() string {
+	return "eventCreated"
+}
+```
+
+`EventName()` devuelbe el routing key que usaremos cuando se publique el mensaje.
+
 ## eventservice
 
 Lee la configuración:
