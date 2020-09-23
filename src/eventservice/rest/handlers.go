@@ -109,6 +109,7 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 	id, err := eh.dbhandler.AddEvent(event)
+
 	if nil != err {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "error occured while persisting event %s", err)
@@ -124,7 +125,11 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		LocationID: string(event.Location.ID),
 	}
 	//...y lo emitimos
-	eh.eventEmitter.Emit(&msg)
+	err = eh.eventEmitter.Emit(&msg)
+
+	if err != nil {
+		panic(err)
+	}
 
 	w.Header().Set("Content-Type", "application/json;charset=utf8")
 

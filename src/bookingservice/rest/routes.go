@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) {
+func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error {
 	r := mux.NewRouter()
 	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database})
 
@@ -22,5 +22,5 @@ func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmit
 		ReadTimeout:  1 * time.Second,
 	}
 
-	srv.ListenAndServe()
+	return srv.ListenAndServe()
 }
