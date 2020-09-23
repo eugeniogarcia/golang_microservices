@@ -83,5 +83,5 @@ func main() {
 	go processor.ProcessEvents()
 
 	//También sirve peticiones http. Usa el emiter para publicar los cambios
-	rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter)
+	panicIfErr(rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter))
 }

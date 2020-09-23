@@ -125,7 +125,11 @@ func (eh *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Re
 		LocationID: string(event.Location.ID),
 	}
 	//...y lo emitimos
-	eh.eventEmitter.Emit(&msg)
+	err = eh.eventEmitter.Emit(&msg)
+
+	if err != nil {
+		panic(err)
+	}
 
 	w.Header().Set("Content-Type", "application/json;charset=utf8")
 
