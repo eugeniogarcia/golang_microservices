@@ -66,10 +66,10 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - 80:80
+      - 8283:80
 
   prometheus:
-    image: prom/prometheus:v1.6.1
+    image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -80,7 +80,7 @@ services:
       - monitoring
 
   grafana:
-    image: grafana/grafana:4.2.0
+    image: grafana/grafana:latest
     ports:
       - 3000:3000
     volumes:

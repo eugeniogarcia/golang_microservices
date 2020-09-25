@@ -17,6 +17,8 @@ import (
 	"lib/msgqueue/kafka"
 	"lib/persistence/dblayer"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/streadway/amqp"
 )
 

@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"log"
-	"time"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"bookingservice/listener"
 	"bookingservice/rest"
@@ -16,6 +16,7 @@ import (
 	"lib/persistence/dblayer"
 
 	"github.com/Shopify/sarama"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/streadway/amqp"
 )
 

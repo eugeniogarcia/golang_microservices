@@ -1,0 +1,9 @@
+FROM node:latest
+
+COPY frontend /app
+WORKDIR /app
+RUN npm run-script build
+
+FROM nginx:stable-alpine
+
+COPY --from=0 /app/build /usr/share/nginx/html/
