@@ -7,11 +7,13 @@ import {EventBookingFormContainer} from "./components/event_booking_form_contain
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import { events,booking} from "./config"
+
 class App extends React.Component<{}, {}> {
     render() {
-        const eventList = () => <EventListContainer eventServiceURL="http://localhost:8181"/>;
+        const eventList = () => <EventListContainer eventServiceURL={events}/>;
 
-        const eventBooking = ({match}:any) => <EventBookingFormContainer eventID={match.params.id} eventServiceURL="http://localhost:8181" bookingServiceURL="http://localhost:8282"/>;
+        const eventBooking = ({ match }: any) => <EventBookingFormContainer eventID={match.params.id} eventServiceURL={events} bookingServiceURL={booking}/>;
 
         return <Router>
             <div>
