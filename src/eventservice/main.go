@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"net/http"
+
 	"github.com/Shopify/sarama"
 
 	"eventservice/rest"
@@ -14,6 +16,8 @@ import (
 	msgqueue_amqp "lib/msgqueue/amqp"
 	"lib/msgqueue/kafka"
 	"lib/persistence/dblayer"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/streadway/amqp"
 )
@@ -67,6 +71,14 @@ func main() {
 
 	fmt.Println("Connecting to database")
 	dbhandler, _ := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
+
+	go func() {
+		fmt.Println("Serving metrics API")
+		h := http.NewServeMux()
+		h.Handle("/metrics", promhttp.Handler())
+
+		http.ListenAndServe(":9100", h)
+	}()
 
 	fmt.Println("Serving API")
 	//RESTful API start

@@ -9,9 +9,9 @@ import (
 
 //Constantes
 const (
-	DB     = "myevents"
-	USERS  = "users"
-	EVENTS = "events"
+	DB        = "myevents"
+	USERS     = "users"
+	EVENTS    = "events"
 	LOCATIONS = "locations"
 )
 
@@ -65,6 +65,7 @@ func (mgoLayer *MongoDBLayer) AddLocation(l persistence.Location) (persistence.L
 func (mgoLayer *MongoDBLayer) AddBookingForUser(id []byte, bk persistence.Booking) error {
 	s := mgoLayer.getFreshSession()
 	defer s.Close()
+
 	return s.DB(DB).C(USERS).UpdateId(bson.ObjectId(id), bson.M{"$addToSet": bson.M{"bookings": []persistence.Booking{bk}}})
 }
 

@@ -34,6 +34,36 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Crea Booking",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"seats\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8184/events/5f6eea834fdaa300011beb42/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8184",
+					"path": [
+						"events",
+						"5f6eea834fdaa300011beb42",
+						"bookings"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}

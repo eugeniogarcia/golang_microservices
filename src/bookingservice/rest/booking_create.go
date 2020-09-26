@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"contracts"
 	"lib/msgqueue"
 	"lib/persistence"
+
+	"github.com/gorilla/mux"
 )
 
 type eventRef struct {
@@ -30,6 +31,7 @@ type createBookingResponse struct {
 type CreateBookingHandler struct {
 	eventEmitter msgqueue.EventEmitter
 	database     persistence.DatabaseHandler
+	usuario      []byte
 }
 
 func (h *CreateBookingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -72,12 +74,22 @@ func (h *CreateBookingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	msg := contracts.EventBookedEvent{
 		EventID: event.ID.Hex(),
-		UserID:  "someUserID",
+		UserID:  string(h.usuario),
 	}
 	h.eventEmitter.Emit(&msg)
 
-	h.database.AddBookingForUser([]byte("someUserID"), booking)
+	bookingCount.
+		WithLabelValues(eventID, event.Name).
+		Add(float64(bookingRequest.Seats))
+	seatsPerBooking.
+		Observe(float64(bookingRequest.Seats))
 
+	err = h.database.AddBookingForUser(h.usuario, booking)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "could not insert in the DB: %s", err)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 

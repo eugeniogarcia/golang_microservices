@@ -1,12 +1,18 @@
 version: "3"
 networks:
   myevents:
+  monitoring:
+
+volumes:
+  prometheus-data:
+  grafana-data:
 
 services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - 15672:15672
+      - 5672:5672
     networks:
       - myevents
 
@@ -55,3 +61,30 @@ services:
       - MONGO_URL=mongodb://bookings-db/bookings
     networks:
       - myevents
+  
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - 8283:80
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      - myevents
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring

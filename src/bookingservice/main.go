@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"bookingservice/listener"
@@ -14,6 +16,7 @@ import (
 	"lib/persistence/dblayer"
 
 	"github.com/Shopify/sarama"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/streadway/amqp"
 )
 
@@ -81,6 +84,14 @@ func main() {
 	//Procesa los eventos en una go rutina
 	processor := listener.EventProcessor{eventListener, dbhandler}
 	go processor.ProcessEvents()
+
+	go func() {
+		fmt.Println("Serving metrics API")
+		h := http.NewServeMux()
+		h.Handle("/metrics", promhttp.Handler())
+
+		http.ListenAndServe(":9100", h)
+	}()
 
 	//También sirve peticiones http. Usa el emiter para publicar los cambios
 	panicIfErr(rest.ServeAPI(config.RestfulEndpoint, dbhandler, eventEmitter))
