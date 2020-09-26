@@ -1,9 +1,16 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: events
+  labels:
+    myevents/app: events
+    myevents/tier: api
 spec:
   replicas: 2
+  selector:
+    matchLabels:
+      myevents/app: events
+      myevents/tier: api
   template:
     metadata:
       labels:

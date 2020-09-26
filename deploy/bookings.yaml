@@ -1,9 +1,16 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookings
+  labels:
+    myevents/app: bookings
+    myevents/tier: api
 spec:
   replicas: 2
+  selector:
+    matchLabels:
+      myevents/app: bookings
+      myevents/tier: api
   template:
     metadata:
       labels:

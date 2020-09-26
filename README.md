@@ -466,6 +466,52 @@ bookings-db   ClusterIP   None         <none>        27017/TCP   18m
 events-db     ClusterIP   None         <none>        27017/TCP   9m28s
 ```
 
+### Deployments
+
+Los pods con los dos microservicios y con el frontend son stateless, así que los desplegamos con un `Deployment`. Podemos especificar el número de réplicas.
+
+```ps
+kubectl get deployment
+
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+bookings   2/2     2            2           3m26s
+events     2/2     2            2           110s
+frontend   1/1     1            1           11s
+```
+
+En el servicio `bookings` y `events` hemos puesto dos instancias de pods. Los pods, a diferencia de con los `statefulsets` tienen una identidad variable:
+
+```ps
+kubectl get po
+
+NAME                        READY   STATUS    RESTARTS   AGE
+bookings-6988d6bf6f-4tlm4   1/1     Running   0          3m46s
+bookings-6988d6bf6f-nm2dc   1/1     Running   0          3m46s
+bookings-db-0               1/1     Running   0          27m
+events-645697446c-5zj95     1/1     Running   0          2m10s
+events-645697446c-nmczv     1/1     Running   0          2m10s
+events-db-0                 1/1     Running   0          24m
+frontend-6c987f9db-h6c6d    1/1     Running   0          31s
+rmq-0                       1/1     Running   0          21m
+```
+
+Hemos creado también unos servicios:
+
+```ps
+kubectl get svc
+
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+amqp-broker   ClusterIP   None            <none>        5672/TCP       9m2s
+bookings      ClusterIP   10.99.174.139   <none>        80/TCP         3m32s
+bookings-db   ClusterIP   None            <none>        27017/TCP      33m
+events        ClusterIP   10.98.223.101   <none>        80/TCP         116s
+events-db     ClusterIP   None            <none>        27017/TCP      24m
+frontend      NodePort    10.109.132.34   <none>        80:31729/TCP   17s
+kubernetes    ClusterIP   10.96.0.1       <none>        443/TCP        84m
+```
+
+Podemos ver que los microservicios los hemos creado como `ClusterIP`. El servicio para el frontend lo hemos creado como `NodePort`.
+
 # Arquitectura de la Aplicación
 
 ## configuration
