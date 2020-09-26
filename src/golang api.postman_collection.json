@@ -1,0 +1,40 @@
+{
+	"info": {
+		"_postman_id": "fdccd365-af7e-4053-a0a9-108a7e048384",
+		"name": "golang api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Crea Evento",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"Name\":\"Maria Joao in Concert\",\r\n\t\"Duration\":  90,\r\n\t\"StartDate\": -6825600,\r\n\t\"EndDate\":   1600732800,\r\n\t\"Location\":{\r\n        \"Name\":\"East side opera house\",\r\n        \"Address\":\"23 Murphy Street East\",\r\n        \"Country\":\"Canada\",\r\n        \"OpenTime\":8,\r\n        \"CloseTime\":22,\r\n        \"Halls\":[{\r\n            \"Name\":\"Olive West\",\r\n            \"Location\":\"Second floor, west wing\",\r\n            \"Capacity\":80\r\n            },\r\n            {\r\n            \"Name\":\"Golden Leaf\",\r\n            \"Location\":\"Third floor\",\r\n            \"Capacity\":80\r\n            }\r\n        ]\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "172.29.80.1:8181/events",
+					"host": [
+						"172",
+						"29",
+						"80",
+						"1"
+					],
+					"port": "8181",
+					"path": [
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
