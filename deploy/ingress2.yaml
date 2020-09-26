@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myevents2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - host: api.myevents.example
+    http:
+      paths:
+      - path: /bookings/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: bookings
+            port:
+              number: 80          
