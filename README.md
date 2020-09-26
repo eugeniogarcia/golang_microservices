@@ -371,7 +371,40 @@ docker image prune
 
 ## Kubernetes
 
+### Setup
+
+Vamos a utilizar el `ingress`. En driver the docker no lo soporta, así que cuando arranquemos `minikube` tendremos que especificar que se use una virtual machine - `hyperv`:
+
+```ps
+minikube start --vm=true --memory=6000 --cpus=4
+```
+
+Habilitamos el `ingress`:
+
+```ps
+minikube addons enable ingress
+```
+
+La ip del ingress será:
+
+```ps
+minikube ip
+
+192.168.1.147
+```
+
+Crearemos en hosts files las siguientes entradas:
+
+```txt
+192.168.1.147	api.myevents.example
+192.168.1.147	www.myevents.example
+```
+
 Podemos usar el contenedor de docker incluido en minikube:
+
+```ps
+minikube docker-env
+```
 
 ```ps
 & minikube -p minikube docker-env | Invoke-Expression
