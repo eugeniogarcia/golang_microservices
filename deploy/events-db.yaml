@@ -1,8 +1,11 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: events-db
 spec:
+  selector:
+    matchLabels:
+      myevents/app: events
   serviceName: events-db
   replicas: 1
   template:
@@ -13,7 +16,7 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: mongo:3.4.3
+        image: mongo:latest
         ports:
         - containerPort: 27017
           name: mongo

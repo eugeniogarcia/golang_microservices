@@ -366,7 +366,104 @@ y lo deje así:
 Despues de compilar tendremos una serie de imagenes temporales que podemos eliminar:
 
 ```ps
-docker images prune
+docker image prune
+```
+
+## Kubernetes
+
+Podemos usar el contenedor de docker incluido en minikube:
+
+```ps
+& minikube -p minikube docker-env | Invoke-Expression
+```
+
+Veamos las imagenes disponibles en el registro:
+
+```ps
+docker images
+
+REPOSITORY                                TAG                 IMAGE ID            
+k8s.gcr.io/kube-proxy                     v1.19.2             d373dd5a8593        
+k8s.gcr.io/kube-controller-manager        v1.19.2             8603821e1a7a        
+k8s.gcr.io/kube-apiserver                 v1.19.2             607331163122        
+k8s.gcr.io/kube-scheduler                 v1.19.2             2f32d66b884f        
+gcr.io/k8s-minikube/storage-provisioner   v3                  bad58561c4be        
+k8s.gcr.io/etcd                           3.4.13-0            0369cf4303ff        
+kubernetesui/dashboard                    v2.0.3              503bc4b7440b        
+k8s.gcr.io/coredns                        1.7.0               bfe3a36ebd25        
+kubernetesui/metrics-scraper              v1.0.4              86262685d9ab        
+k8s.gcr.io/pause                          3.2                 80d28bedfe5d        
+```
+
+Podemos crear nuestras imagenes:
+
+```ps
+docker build -f dockerfile.eventservice  -t myevents/eventservice .
+```
+
+```ps
+docker build -f dockerfile.bookingservice  -t myevents/bookingservice .
+```
+
+```ps
+docker build -f Dockerfile.frontend  -t myevents/frontend .
+```
+
+### Statefulsets
+
+Las bases de datos y rabbit necesitan un almacenamiento en disco, por este motivo creareamos unos `statefulsets`:
+
+```ps
+kubectl get statefulsets
+
+NAME          READY   AGE
+bookings-db   1/1     8m3s
+events-db     1/1     4m55s
+rmq           1/1     2m13s
+```
+
+Podemos ver los pods que se han creado. Observese como al estar asociados a un `statefulset`, la identidad de cada pod es fija:
+
+```ps
+kubectl get po
+
+NAME            READY   STATUS    RESTARTS   AGE
+bookings-db-0   1/1     Running   0          8m30s
+events-db-0     1/1     Running   0          5m22s
+rmq-0           1/1     Running   0          2m40s
+```
+
+Veamos los `pv` que se han creado:
+
+```ps
+kubectl get pv
+
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS   REASON
+pvc-57bf91a3-e565-4c24-9005-434db948569b   1Gi        RWO            Delete           Bound    default/data-events-db-0     standard
+pvc-639291ea-c753-4482-98ff-175039a2a844   1Gi        RWO            Delete           Bound    default/data-bookings-db-0   standard
+pvc-7b61b373-7a96-4bad-a178-88d2df51372d   1Gi        RWO            Delete           Bound    default/data-rmq-0           standard
+```
+
+Y los `pvc`:
+
+```ps
+PS [EUGENIO] >kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS
+data-bookings-db-0   Bound    pvc-639291ea-c753-4482-98ff-175039a2a844   1Gi        RWO            standard
+data-events-db-0     Bound    pvc-57bf91a3-e565-4c24-9005-434db948569b   1Gi        RWO            standard
+data-rmq-0           Bound    pvc-7b61b373-7a96-4bad-a178-88d2df51372d   1Gi        RWO            standard
+```
+
+Podemos observar como el pv esta bindeado a un pvc.
+
+Hemos creado tambien unos servicios para poder acceder a la base de datos:
+
+```ps
+kubectl get svc
+
+NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
+bookings-db   ClusterIP   None         <none>        27017/TCP   18m
+events-db     ClusterIP   None         <none>        27017/TCP   9m28s
 ```
 
 # Arquitectura de la Aplicación
