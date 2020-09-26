@@ -1,6 +1,6 @@
 {
     "databasetype" : "mongodb",
-    "dbconnection": "mongodb://localhost:27017",
-    "restfulapi_endpoint": "localhost:8182",
+    "dbconnection": "mongodb://172.19.128.1:8008",
+    "restfulapi_endpoint": "localhost:8184",
     "restfulapi-tlsendpoint": "localhost:9192"
 }

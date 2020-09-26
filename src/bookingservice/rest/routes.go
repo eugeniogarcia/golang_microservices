@@ -13,7 +13,11 @@ import (
 
 func ServeAPI(listenAddr string, database persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error {
 	r := mux.NewRouter()
-	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database})
+	usuario, err := database.AddUser(persistence.User{First: "Eugenio", Last: "Garcia", Age: 50})
+	if err != nil {
+		return err
+	}
+	r.Methods("post").Path("/events/{eventID}/bookings").Handler(&CreateBookingHandler{eventEmitter, database, usuario})
 
 	srv := http.Server{
 		Handler:      handlers.CORS()(r),
