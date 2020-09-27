@@ -565,9 +565,39 @@ kubernetes    ClusterIP   10.96.0.1       <none>        443/TCP        84m
 
 Podemos ver que los microservicios los hemos creado como `ClusterIP`. El servicio para el frontend lo hemos creado como `NodePort`.
 
+
+
 ### Ingress
 
-x
+Usamos nginx como ingress. Usamos una anotación para hacer el rewrite del path. El path es un regex.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myevents2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+```
+
+Lo que estamos diciendo aquí es que el recurso que se enviará al backend es `/$1`, dodne `$1` es la primera agrupación. El path es una expresión `regex`, cuando decimos primera agrupación, nos referimos por tanto a la primera agrupación del regex del path:
+
+```yaml
+spec:
+  rules:
+  - host: api.myevents.example
+    http:
+      paths:
+      - path: /bookings/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: bookings
+            port:
+              number: 80      
+```
+
+`$1` es lo que sigue a `/bookings`. Esto es, si hacemos una petición a `http://api.myevents.example/bookings/event/12345/bookings`, la petición que irá al backend es `http://api.myevents.example/event/12345/bookings`.
 
 # Arquitectura de la Aplicación
 
