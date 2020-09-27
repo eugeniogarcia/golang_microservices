@@ -369,6 +369,26 @@ Despues de compilar tendremos una serie de imagenes temporales que podemos elimi
 docker image prune
 ```
 
+## Glide
+
+Glide es un gestor de paquetes para go. Utiliza un archivo llamado `glide.yaml` para guardar todas las dependencias que necesitamos. Podemos hacer que Glide inspeccione nuestro repositorio y nos cree el archivo automáticamente:
+
+```ps
+glide init
+```
+
+Tenemos que revisar el archivo `glide.yaml` para eliminar los paquetes que son locales, que hemos definido en el propio repositorio. Una vez hecho esto, podemos descargar las versiones concretas con el siguiente comando:
+
+```ps
+glide install
+```
+
+Glide creara un directorio `vendor` y descargara todas las versiones que necesitamos. Al compilar, las versiones encontradas en el directorio `vendor` toman precedencia sobre versiones encontradas en cualquier otro sitio. De esta forma nos podemos asegurar de que estemos usando las versiones especificas de los paquetes que se han indicado en `glide.yaml`. Podemos bajar una versión actualizada con:
+
+```ps
+glide update
+```
+
 ## Kubernetes
 
 ### Setup
@@ -544,6 +564,10 @@ kubernetes    ClusterIP   10.96.0.1       <none>        443/TCP        84m
 ```
 
 Podemos ver que los microservicios los hemos creado como `ClusterIP`. El servicio para el frontend lo hemos creado como `NodePort`.
+
+### Ingress
+
+x
 
 # Arquitectura de la Aplicación
 
