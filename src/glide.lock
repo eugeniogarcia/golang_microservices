@@ -1,0 +1,229 @@
+hash: 4f0836a00f7e039ba167829ab1eabe7d3496c54ec2e9f06d7aaaf3e4a007cd92
+updated: 2020-09-27T17:48:15.6462402+02:00
+imports:
+- name: github.com/aws/aws-sdk-go
+  version: e11b98b98e9adb7a0da0287afe242b8b11893ce4
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/processcreds
+  - aws/credentials/stscreds
+  - aws/crr
+  - aws/csm
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/context
+  - internal/ini
+  - internal/sdkio
+  - internal/sdkmath
+  - internal/sdkrand
+  - internal/sdkuri
+  - internal/shareddefaults
+  - internal/strings
+  - internal/sync/singleflight
+  - private/protocol
+  - private/protocol/json/jsonutil
+  - private/protocol/jsonrpc
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - service/dynamodb
+  - service/dynamodb/dynamodbattribute
+  - service/sqs
+  - service/sts
+  - service/sts/stsiface
+- name: github.com/beorn7/perks
+  version: 37c8de3658fcb183f997c4e13e8337516ab753e6
+  subpackages:
+  - quantile
+- name: github.com/davecgh/go-spew
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  subpackages:
+  - spew
+- name: github.com/eapache/go-resiliency
+  version: b98ce2825f7276cc41027348986a241ef5d62fd8
+  subpackages:
+  - breaker
+- name: github.com/eapache/go-xerial-snappy
+  version: 776d5712da21bc4762676d614db1d8a64f4238b0
+- name: github.com/eapache/queue
+  version: 093482f3f8ce946c05bcba64badd2c82369e084d
+- name: github.com/felixge/httpsnoop
+  version: 80c3c2123b72a19bf86e424759ce61a51b0f5f1b
+- name: github.com/golang/protobuf
+  version: 91c84e0db17890c2bb64280a6d660e73e4237fd1
+  subpackages:
+  - proto
+  - ptypes
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/timestamp
+- name: github.com/golang/snappy
+  version: 196ae77b8a26000fa30caa8b2b541e09674dbc43
+- name: github.com/gorilla/handlers
+  version: d453effd20e6817a8acfd9d278dadd21371da0ba
+- name: github.com/gorilla/mux
+  version: 98cb6bf42e086f6af920b965c38cacc07402d51b
+- name: github.com/hashicorp/go-uuid
+  version: 6195a4f20692188e0a389def25559731d1e130f9
+- name: github.com/jcmturner/gofork
+  version: dc7c13fece037a4a36e2b3c69db4991498d30692
+  subpackages:
+  - encoding/asn1
+  - x/crypto/pbkdf2
+- name: github.com/jmespath/go-jmespath
+  version: 3d4fd11601ddca248480565884e34e393313cd62
+- name: github.com/klauspost/compress
+  version: 06dfa05f34740a0ee7ad9932a6f65d523328e98e
+  subpackages:
+  - fse
+  - huff0
+  - snappy
+  - zstd
+  - zstd/internal/xxhash
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c182affec369e30f25d3eb8cd8a478dee585ae7d
+  subpackages:
+  - pbutil
+- name: github.com/mitchellh/mapstructure
+  version: 9e1e4717f8567d7ead72d070d064ad17d444a67e
+- name: github.com/pierrec/lz4
+  version: e876bbd321b3b3a278637d63e53a7211ab252365
+  subpackages:
+  - internal/xxh32
+- name: github.com/prometheus/client_golang
+  version: fe7bd95816c4bf8b6482e529a919a0957e631a6e
+  subpackages:
+  - prometheus
+  - prometheus/internal
+  - prometheus/promhttp
+- name: github.com/prometheus/client_model
+  version: 60555c9708c786597e6b07bf846d0dc5c2a46f54
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 317b7b125e8fddda956d0c9574e5f03f438ed5bc
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: 9dece15c53cd5e9fbfbd72d5108adcf526a3f486
+  subpackages:
+  - internal/fs
+  - internal/util
+- name: github.com/rcrowley/go-metrics
+  version: 10cdbea86bc0b922507ce91d43f4f78a5bea2e8f
+- name: github.com/Shopify/sarama
+  version: c1c2a089d4cfe1fe4db6ec2ef8b33e823c6f228b
+- name: github.com/streadway/amqp
+  version: 1c71cc93ed716f9a6f4c2ae8955c25f9176d9f19
+- name: golang.org/x/crypto
+  version: 5c72a883971a4325f8c62bf07b6d38c20ea47a6a
+  subpackages:
+  - md4
+  - pbkdf2
+- name: golang.org/x/net
+  version: 5d4f7005572804eaf7f5ecdd2473a62557f733ba
+  subpackages:
+  - internal/socks
+  - proxy
+- name: golang.org/x/sys
+  version: 9d91bd62050c7b3011b7df0d2a4daa0042684420
+  subpackages:
+  - internal/unsafeheader
+  - unix
+  - windows
+- name: google.golang.org/protobuf
+  version: db5c900f0ce544131509b33f6d68ec651e3ca91c
+  subpackages:
+  - encoding/prototext
+  - encoding/protowire
+  - internal/descfmt
+  - internal/descopts
+  - internal/detrand
+  - internal/encoding/defval
+  - internal/encoding/messageset
+  - internal/encoding/tag
+  - internal/encoding/text
+  - internal/errors
+  - internal/filedesc
+  - internal/filetype
+  - internal/flags
+  - internal/genid
+  - internal/impl
+  - internal/order
+  - internal/pragma
+  - internal/set
+  - internal/strs
+  - internal/version
+  - proto
+  - reflect/protoreflect
+  - reflect/protoregistry
+  - runtime/protoiface
+  - runtime/protoimpl
+  - types/known/anypb
+  - types/known/durationpb
+  - types/known/timestamppb
+- name: gopkg.in/jcmturner/aescts.v1
+  version: f6abebb3171c4c1b1fea279cb7c7325020a26290
+- name: gopkg.in/jcmturner/dnsutils.v1
+  version: 13eeb8d49ffb74d7a75784c35e4d900607a3943c
+- name: gopkg.in/jcmturner/gokrb5.v7
+  version: 0b0d9d762bbc834e1e14f3f39dcea984364e9d63
+  subpackages:
+  - asn1tools
+  - client
+  - config
+  - credentials
+  - crypto
+  - crypto/common
+  - crypto/etype
+  - crypto/rfc3961
+  - crypto/rfc3962
+  - crypto/rfc4757
+  - crypto/rfc8009
+  - gssapi
+  - iana
+  - iana/addrtype
+  - iana/adtype
+  - iana/asnAppTag
+  - iana/chksumtype
+  - iana/errorcode
+  - iana/etypeID
+  - iana/flags
+  - iana/keyusage
+  - iana/msgtype
+  - iana/nametype
+  - iana/patype
+  - kadmin
+  - keytab
+  - krberror
+  - messages
+  - pac
+  - types
+- name: gopkg.in/jcmturner/rpc.v1
+  version: 99a8ce2fbf8b8087b6ed12a37c61b10f04070043
+  subpackages:
+  - mstypes
+  - ndr
+- name: gopkg.in/mgo.v2
+  version: a6b53ec6cb22a3699387a57a161566f9402ee85b
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
+testImports: []

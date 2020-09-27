@@ -366,8 +366,238 @@ y lo deje así:
 Despues de compilar tendremos una serie de imagenes temporales que podemos eliminar:
 
 ```ps
-docker images prune
+docker image prune
 ```
+
+## Glide
+
+Glide es un gestor de paquetes para go. Utiliza un archivo llamado `glide.yaml` para guardar todas las dependencias que necesitamos. Podemos hacer que Glide inspeccione nuestro repositorio y nos cree el archivo automáticamente:
+
+```ps
+glide init
+```
+
+Tenemos que revisar el archivo `glide.yaml` para eliminar los paquetes que son locales, que hemos definido en el propio repositorio. Una vez hecho esto, podemos descargar las versiones concretas con el siguiente comando:
+
+```ps
+glide install
+```
+
+Glide creara un directorio `vendor` y descargara todas las versiones que necesitamos. Al compilar, las versiones encontradas en el directorio `vendor` toman precedencia sobre versiones encontradas en cualquier otro sitio. De esta forma nos podemos asegurar de que estemos usando las versiones especificas de los paquetes que se han indicado en `glide.yaml`. Podemos bajar una versión actualizada con:
+
+```ps
+glide update
+```
+
+## Kubernetes
+
+### Setup
+
+Vamos a utilizar el `ingress`. En driver the docker no lo soporta, así que cuando arranquemos `minikube` tendremos que especificar que se use una virtual machine - `hyperv`:
+
+```ps
+minikube start --vm=true --memory=6000 --cpus=4
+```
+
+Habilitamos el `ingress`:
+
+```ps
+minikube addons enable ingress
+```
+
+La ip del ingress será:
+
+```ps
+minikube ip
+
+192.168.1.147
+```
+
+Crearemos en hosts files las siguientes entradas:
+
+```txt
+192.168.1.147	api.myevents.example
+192.168.1.147	www.myevents.example
+```
+
+Podemos usar el contenedor de docker incluido en minikube:
+
+```ps
+minikube docker-env
+```
+
+```ps
+& minikube -p minikube docker-env | Invoke-Expression
+```
+
+Veamos las imagenes disponibles en el registro:
+
+```ps
+docker images
+
+REPOSITORY                                TAG                 IMAGE ID            
+k8s.gcr.io/kube-proxy                     v1.19.2             d373dd5a8593        
+k8s.gcr.io/kube-controller-manager        v1.19.2             8603821e1a7a        
+k8s.gcr.io/kube-apiserver                 v1.19.2             607331163122        
+k8s.gcr.io/kube-scheduler                 v1.19.2             2f32d66b884f        
+gcr.io/k8s-minikube/storage-provisioner   v3                  bad58561c4be        
+k8s.gcr.io/etcd                           3.4.13-0            0369cf4303ff        
+kubernetesui/dashboard                    v2.0.3              503bc4b7440b        
+k8s.gcr.io/coredns                        1.7.0               bfe3a36ebd25        
+kubernetesui/metrics-scraper              v1.0.4              86262685d9ab        
+k8s.gcr.io/pause                          3.2                 80d28bedfe5d        
+```
+
+Podemos crear nuestras imagenes:
+
+```ps
+docker build -f dockerfile.eventservice  -t myevents/eventservice .
+```
+
+```ps
+docker build -f dockerfile.bookingservice  -t myevents/bookingservice .
+```
+
+```ps
+docker build -f Dockerfile.frontend  -t myevents/frontend .
+```
+
+### Statefulsets
+
+Las bases de datos y rabbit necesitan un almacenamiento en disco, por este motivo creareamos unos `statefulsets`:
+
+```ps
+kubectl get statefulsets
+
+NAME          READY   AGE
+bookings-db   1/1     8m3s
+events-db     1/1     4m55s
+rmq           1/1     2m13s
+```
+
+Podemos ver los pods que se han creado. Observese como al estar asociados a un `statefulset`, la identidad de cada pod es fija:
+
+```ps
+kubectl get po
+
+NAME            READY   STATUS    RESTARTS   AGE
+bookings-db-0   1/1     Running   0          8m30s
+events-db-0     1/1     Running   0          5m22s
+rmq-0           1/1     Running   0          2m40s
+```
+
+Veamos los `pv` que se han creado:
+
+```ps
+kubectl get pv
+
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS   REASON
+pvc-57bf91a3-e565-4c24-9005-434db948569b   1Gi        RWO            Delete           Bound    default/data-events-db-0     standard
+pvc-639291ea-c753-4482-98ff-175039a2a844   1Gi        RWO            Delete           Bound    default/data-bookings-db-0   standard
+pvc-7b61b373-7a96-4bad-a178-88d2df51372d   1Gi        RWO            Delete           Bound    default/data-rmq-0           standard
+```
+
+Y los `pvc`:
+
+```ps
+PS [EUGENIO] >kubectl get pvc
+NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS
+data-bookings-db-0   Bound    pvc-639291ea-c753-4482-98ff-175039a2a844   1Gi        RWO            standard
+data-events-db-0     Bound    pvc-57bf91a3-e565-4c24-9005-434db948569b   1Gi        RWO            standard
+data-rmq-0           Bound    pvc-7b61b373-7a96-4bad-a178-88d2df51372d   1Gi        RWO            standard
+```
+
+Podemos observar como el pv esta bindeado a un pvc.
+
+Hemos creado tambien unos servicios para poder acceder a la base de datos:
+
+```ps
+kubectl get svc
+
+NAME          TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
+bookings-db   ClusterIP   None         <none>        27017/TCP   18m
+events-db     ClusterIP   None         <none>        27017/TCP   9m28s
+```
+
+### Deployments
+
+Los pods con los dos microservicios y con el frontend son stateless, así que los desplegamos con un `Deployment`. Podemos especificar el número de réplicas.
+
+```ps
+kubectl get deployment
+
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+bookings   2/2     2            2           3m26s
+events     2/2     2            2           110s
+frontend   1/1     1            1           11s
+```
+
+En el servicio `bookings` y `events` hemos puesto dos instancias de pods. Los pods, a diferencia de con los `statefulsets` tienen una identidad variable:
+
+```ps
+kubectl get po
+
+NAME                        READY   STATUS    RESTARTS   AGE
+bookings-6988d6bf6f-4tlm4   1/1     Running   0          3m46s
+bookings-6988d6bf6f-nm2dc   1/1     Running   0          3m46s
+bookings-db-0               1/1     Running   0          27m
+events-645697446c-5zj95     1/1     Running   0          2m10s
+events-645697446c-nmczv     1/1     Running   0          2m10s
+events-db-0                 1/1     Running   0          24m
+frontend-6c987f9db-h6c6d    1/1     Running   0          31s
+rmq-0                       1/1     Running   0          21m
+```
+
+Hemos creado también unos servicios:
+
+```ps
+kubectl get svc
+
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+amqp-broker   ClusterIP   None            <none>        5672/TCP       9m2s
+bookings      ClusterIP   10.99.174.139   <none>        80/TCP         3m32s
+bookings-db   ClusterIP   None            <none>        27017/TCP      33m
+events        ClusterIP   10.98.223.101   <none>        80/TCP         116s
+events-db     ClusterIP   None            <none>        27017/TCP      24m
+frontend      NodePort    10.109.132.34   <none>        80:31729/TCP   17s
+kubernetes    ClusterIP   10.96.0.1       <none>        443/TCP        84m
+```
+
+Podemos ver que los microservicios los hemos creado como `ClusterIP`. El servicio para el frontend lo hemos creado como `NodePort`.
+
+
+
+### Ingress
+
+Usamos nginx como ingress. Usamos una anotación para hacer el rewrite del path. El path es un regex.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myevents2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+```
+
+Lo que estamos diciendo aquí es que el recurso que se enviará al backend es `/$1`, dodne `$1` es la primera agrupación. El path es una expresión `regex`, cuando decimos primera agrupación, nos referimos por tanto a la primera agrupación del regex del path:
+
+```yaml
+spec:
+  rules:
+  - host: api.myevents.example
+    http:
+      paths:
+      - path: /bookings/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: bookings
+            port:
+              number: 80      
+```
+
+`$1` es lo que sigue a `/bookings`. Esto es, si hacemos una petición a `http://api.myevents.example/bookings/event/12345/bookings`, la petición que irá al backend es `http://api.myevents.example/event/12345/bookings`.
 
 # Arquitectura de la Aplicación
 

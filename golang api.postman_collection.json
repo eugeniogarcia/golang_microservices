@@ -64,6 +64,68 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Crea Evento Minikube",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"Name\":\"La Lang in Concert\",\r\n\t\"Duration\":  90,\r\n\t\"StartDate\": -6825600,\r\n\t\"EndDate\":   1600732800,\r\n\t\"Location\":{\r\n        \"Name\":\"East side opera house\",\r\n        \"Address\":\"23 Murphy Street East\",\r\n        \"Country\":\"Canada\",\r\n        \"OpenTime\":8,\r\n        \"CloseTime\":22,\r\n        \"Halls\":[{\r\n            \"Name\":\"Olive West\",\r\n            \"Location\":\"Second floor, west wing\",\r\n            \"Capacity\":80\r\n            },\r\n            {\r\n            \"Name\":\"Golden Leaf\",\r\n            \"Location\":\"Third floor\",\r\n            \"Capacity\":80\r\n            }\r\n        ]\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://api.myevents.example/events",
+					"protocol": "http",
+					"host": [
+						"api",
+						"myevents",
+						"example"
+					],
+					"path": [
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crea Booking  Minikube",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"seats\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://api.myevents.example:/bookings/events/5f6f8db0a28e0b000124fdd1/bookings",
+					"protocol": "http",
+					"host": [
+						"api",
+						"myevents",
+						"example"
+					],
+					"port": "",
+					"path": [
+						"bookings",
+						"events",
+						"5f6f8db0a28e0b000124fdd1",
+						"bookings"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}
